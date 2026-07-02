@@ -43,6 +43,21 @@ st.set_page_config(
 st.title("👘 VtuberWear")
 st.caption("AIがあなたのキャラに合わせたイベント衣装を3日でお届けします")
 
+# ── サンプルギャラリー ────────────────────────────────────
+st.subheader("✨ 生成サンプル")
+st.caption("同じキャラクター（紺髪・金瞳）で2つのイベント衣装を生成した例です")
+
+col_a, col_b = st.columns(2)
+samples_dir = Path(__file__).parent / "samples"
+with col_a:
+    yukata_path = samples_dir / "yukata.png"
+    if yukata_path.exists():
+        st.image(str(yukata_path), caption="🎆 夏祭り・花火大会（浴衣）")
+with col_b:
+    halloween_path = samples_dir / "halloween.png"
+    if halloween_path.exists():
+        st.image(str(halloween_path), caption="🎃 ハロウィン（魔女衣装）")
+
 st.divider()
 
 # ── STEP 1: キャラクター情報 ──────────────────────────────
