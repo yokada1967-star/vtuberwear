@@ -1,0 +1,5 @@
+# APIキーを含むファイルは絶対にGitHubに上げない
+config.json
+.env
+__pycache__/
+*.pyc
