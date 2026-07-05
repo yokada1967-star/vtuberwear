@@ -74,9 +74,9 @@ with col2:
     body_type   = st.selectbox("体型", BODY_TYPES)
 
 # オッドアイ選択時は左右の色を個別指定
-EYE_COLORS_SIMPLE = [c for c in EYE_COLORS if c != "オッドアイ（左右違う色）"]
+EYE_COLORS_SIMPLE = [c for c in EYE_COLORS if c != "オッドアイ（左右違う）"]
 eye_left = eye_right = None
-if eye_color == "オッドアイ（左右違う色）":
+if eye_color == "オッドアイ（左右違う）":
     st.caption("左右それぞれの色を選んでください")
     col_l, col_r = st.columns(2)
     with col_l:
@@ -149,23 +149,42 @@ if st.button("🎨  コンセプト画像を生成する", type="primary", use_c
     eye_en_map = {
         "茶色": "brown", "黒": "black", "青": "blue", "緑": "green",
         "赤": "red", "金": "golden", "紫": "purple", "ピンク": "pink",
-        "オッドアイ（左右違う）": "heterochromia eyes",
+    }
+    hair_length_en_map = {
+        "ショート": "short hair", "ミディアム": "medium length hair", "ロング": "long hair",
+        "ツインテール": "twin tails hairstyle", "ポニーテール": "ponytail hairstyle", "その他": "",
+    }
+    skin_en_map = {
+        "標準": "", "白め（色白）": "pale white skin", "日焼け（褐色）": "tan dark skin",
+    }
+    body_en_map = {
+        "標準": "", "小柄（ロリ系）": "petite small body", "スラリ（スレンダー）": "slender slim body", "ふくよか": "curvy body",
     }
 
-    if eye_color == "オッドアイ（左右違う色）" and eye_left and eye_right:
-        eye_desc = (f"heterochromia, left eye {eye_en_map.get(eye_left, '')}, "
+    if eye_color == "オッドアイ（左右違う）" and eye_left and eye_right:
+        eye_desc = (f"heterochromia eyes, left eye {eye_en_map.get(eye_left, '')}, "
                     f"right eye {eye_en_map.get(eye_right, '')}")
     else:
         eye_desc = f"{eye_en_map.get(eye_color, '')} eyes"
 
+    char_parts = [
+        f"{hair_en_map.get(hair_color, '')} hair",
+        hair_length_en_map.get(hair_length, ""),
+        eye_desc,
+        skin_en_map.get(skin_tone, ""),
+        body_en_map.get(body_type, ""),
+    ]
+    char_desc = ", ".join(p for p in char_parts if p)
+
     prompt = (
-        f"anime vtuber character, {hair_en_map.get(hair_color, '')} hair, "
-        f"{eye_desc}, "
+        f"anime vtuber character, {char_desc}, "
         f"{event_info['costume']}, "
         f"{vibe_en_map.get(vibe, 'cute')} style, "
         f"full body standing pose, flat 2D cel shading anime illustration, "
         f"clean line art, white background, high quality"
     )
+    if char_notes:
+        prompt += f", {char_notes}"
     if order_notes:
         prompt += f", {order_notes}"
 
