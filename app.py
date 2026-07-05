@@ -182,11 +182,14 @@ if st.button("🎨  コンセプト画像を生成する", type="primary", use_c
 
     prompt = (
         f"{eye_priority}"
-        f"anime vtuber character, {char_desc}, "
+        f"beautiful anime girl vtuber, {char_desc}, "
         f"{event_info['costume']}, "
-        f"{vibe_en_map.get(vibe, 'cute')} style, "
-        f"front facing, full body standing pose, flat 2D cel shading anime illustration, "
-        f"clean line art, white background, high quality"
+        f"{vibe_en_map.get(vibe, 'cute kawaii')} expression, "
+        f"realistic anime proportions, tall slender figure, NOT chibi, "
+        f"high quality anime illustration, detailed cel shading with highlights and shadows, "
+        f"beautiful detailed eyes, intricate fabric texture, "
+        f"professional anime key visual style, masterpiece quality, "
+        f"full body standing pose, white background"
     )
     if char_notes:
         prompt += f", {char_notes}"
@@ -198,7 +201,7 @@ if st.button("🎨  コンセプト画像を生成する", type="primary", use_c
         "prompt": prompt,
         "n": 1,
         "size": "1024x1536",
-        "quality": "medium",
+        "quality": "high",
     }).encode()
 
     req = urllib.request.Request(
