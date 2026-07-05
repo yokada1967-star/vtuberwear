@@ -1,6 +1,7 @@
 import streamlit as st
 import json
 import io
+import base64
 import urllib.request
 import urllib.error
 from PIL import Image
@@ -111,6 +112,7 @@ order_notes = st.text_area(
     placeholder="例: メインカラーをオレンジにしてほしい、和風より洋風で、アクセサリーを派手めに",
     height=80,
 )
+st.caption("※ AIへの追加指示は **英語** で書くとより正確に反映されます。例: `front facing face`, `orange color scheme`, `more accessories`")
 
 st.divider()
 
@@ -123,13 +125,13 @@ if st.button("🎨  コンセプト画像を生成する", type="primary", use_c
 
     # Streamlit Cloud上はsecretsから、ローカルはconfig.jsonから読む
     try:
-        api_key = st.secrets["stability_api_key"]
+        api_key = st.secrets["openai_api_key"]
     except Exception:
         if not CONFIG_PATH.exists():
             st.error("APIキーが設定されていません。管理者にお問い合わせください。")
             st.stop()
         with open(CONFIG_PATH) as f:
-            api_key = json.load(f)["stability_api_key"]
+            api_key = json.load(f)["openai_api_key"]
 
     # プロンプト構築
     vibe_en_map = {
@@ -155,7 +157,8 @@ if st.button("🎨  コンセプト画像を生成する", type="primary", use_c
         "ツインテール": "twin tails hairstyle", "ポニーテール": "ponytail hairstyle", "その他": "",
     }
     skin_en_map = {
-        "標準": "", "白め（色白）": "pale white skin", "日焼け（褐色）": "tan dark skin",
+        "標準": "", "白め（色白）": "very pale white skin, fair complexion",
+        "日焼け（褐色）": "dark tanned brown skin, sun-kissed dark complexion",
     }
     body_en_map = {
         "標準": "", "小柄（ロリ系）": "petite small body", "スラリ（スレンダー）": "slender slim body", "ふくよか": "curvy body",
@@ -164,25 +167,25 @@ if st.button("🎨  コンセプト画像を生成する", type="primary", use_c
     if eye_color == "オッドアイ（左右違う）" and eye_left and eye_right:
         l = eye_en_map.get(eye_left, '')
         r = eye_en_map.get(eye_right, '')
-        eye_desc = (f"left eye is {l}, right eye is {r}, "
-                    f"two clearly different colored eyes, one {l} iris and one {r} iris")
+        eye_desc = f"{l} left eye and {r} right eye, heterochromia"
+        # オッドアイは先頭に置いてAIに最優先させる
+        eye_priority = f"heterochromia eyes: left eye {l}, right eye {r}. "
     else:
         eye_desc = f"{eye_en_map.get(eye_color, '')} eyes"
+        eye_priority = ""
 
-    char_parts = [
-        f"{hair_en_map.get(hair_color, '')} hair",
-        hair_length_en_map.get(hair_length, ""),
-        eye_desc,
-        skin_en_map.get(skin_tone, ""),
-        body_en_map.get(body_type, ""),
-    ]
+    skin_desc = skin_en_map.get(skin_tone, "")
+    hair_desc = f"{hair_en_map.get(hair_color, '')} hair, {hair_length_en_map.get(hair_length, '')}".strip(", ")
+
+    char_parts = [hair_desc, eye_desc, skin_desc, body_en_map.get(body_type, "")]
     char_desc = ", ".join(p for p in char_parts if p)
 
     prompt = (
+        f"{eye_priority}"
         f"anime vtuber character, {char_desc}, "
         f"{event_info['costume']}, "
         f"{vibe_en_map.get(vibe, 'cute')} style, "
-        f"full body standing pose, flat 2D cel shading anime illustration, "
+        f"front facing, full body standing pose, flat 2D cel shading anime illustration, "
         f"clean line art, white background, high quality"
     )
     if char_notes:
@@ -190,38 +193,29 @@ if st.button("🎨  コンセプト画像を生成する", type="primary", use_c
     if order_notes:
         prompt += f", {order_notes}"
 
-    negative = "realistic, photo, 3d render, blurry, nsfw, multiple characters, bad anatomy"
-
-    boundary = "vtwboundary"
-    def mp(name, value, filename=None, ctype=None):
-        if filename:
-            return (f'--{boundary}\r\nContent-Disposition: form-data; name="{name}"; '
-                    f'filename="{filename}"\r\nContent-Type: {ctype}\r\n\r\n').encode() + value + b"\r\n"
-        return f'--{boundary}\r\nContent-Disposition: form-data; name="{name}"\r\n\r\n{value}\r\n'.encode()
-
-    body = (
-        mp("prompt", prompt) +
-        mp("negative_prompt", negative) +
-        mp("aspect_ratio", "9:16") +
-        mp("output_format", "png") +
-        f"--{boundary}--\r\n".encode()
-    )
+    body = json.dumps({
+        "model": "gpt-image-1",
+        "prompt": prompt,
+        "n": 1,
+        "size": "1024x1536",
+        "quality": "medium",
+    }).encode()
 
     req = urllib.request.Request(
-        "https://api.stability.ai/v2beta/stable-image/generate/core",
+        "https://api.openai.com/v1/images/generations",
         data=body,
         headers={
             "Authorization": f"Bearer {api_key}",
-            "Accept": "image/*",
-            "User-Agent": "Mozilla/5.0",
-            "Content-Type": f"multipart/form-data; boundary={boundary}",
+            "Content-Type": "application/json",
         }
     )
 
     with st.spinner("AIが衣装を考えています... 約30秒お待ちください"):
         try:
-            with urllib.request.urlopen(req, timeout=90) as res:
-                img = Image.open(io.BytesIO(res.read()))
+            with urllib.request.urlopen(req, timeout=120) as res:
+                result = json.loads(res.read())
+                img_data = base64.b64decode(result["data"][0]["b64_json"])
+                img = Image.open(io.BytesIO(img_data))
                 st.image(img, caption=f"{event_label} コンセプト画像", use_container_width=True)
                 st.success("生成完了！このデザインをベースに3日以内に衣装データをお届けします。")
 
@@ -235,7 +229,7 @@ if st.button("🎨  コンセプト画像を生成する", type="primary", use_c
                     use_container_width=True,
                 )
         except urllib.error.HTTPError as e:
-            st.error(f"生成エラー: {e.code} — {e.read().decode()[:200]}")
+            st.error(f"生成エラー: {e.code} — {e.read().decode()[:300]}")
 
 st.divider()
 st.caption("VtuberWear | 月9,800円〜 | 最短3日納品 | 30日動作保証")
