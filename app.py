@@ -162,8 +162,10 @@ if st.button("🎨  コンセプト画像を生成する", type="primary", use_c
     }
 
     if eye_color == "オッドアイ（左右違う）" and eye_left and eye_right:
-        eye_desc = (f"heterochromia eyes, left eye {eye_en_map.get(eye_left, '')}, "
-                    f"right eye {eye_en_map.get(eye_right, '')}")
+        l = eye_en_map.get(eye_left, '')
+        r = eye_en_map.get(eye_right, '')
+        eye_desc = (f"left eye is {l}, right eye is {r}, "
+                    f"two clearly different colored eyes, one {l} iris and one {r} iris")
     else:
         eye_desc = f"{eye_en_map.get(eye_color, '')} eyes"
 
