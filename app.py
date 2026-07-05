@@ -73,6 +73,17 @@ with col2:
     skin_tone   = st.selectbox("肌の色", SKIN_TONES)
     body_type   = st.selectbox("体型", BODY_TYPES)
 
+# オッドアイ選択時は左右の色を個別指定
+EYE_COLORS_SIMPLE = [c for c in EYE_COLORS if c != "オッドアイ（左右違う色）"]
+eye_left = eye_right = None
+if eye_color == "オッドアイ（左右違う色）":
+    st.caption("左右それぞれの色を選んでください")
+    col_l, col_r = st.columns(2)
+    with col_l:
+        eye_left  = st.selectbox("左目の色", EYE_COLORS_SIMPLE, key="eye_l")
+    with col_r:
+        eye_right = st.selectbox("右目の色", EYE_COLORS_SIMPLE, key="eye_r")
+
 char_notes = st.text_area(
     "キャラの特徴・こだわり（任意）",
     placeholder="例: 猫耳あり、ツノがある、サイバーパンク系の雰囲気が好き",
@@ -141,9 +152,15 @@ if st.button("🎨  コンセプト画像を生成する", type="primary", use_c
         "オッドアイ（左右違う）": "heterochromia eyes",
     }
 
+    if eye_color == "オッドアイ（左右違う色）" and eye_left and eye_right:
+        eye_desc = (f"heterochromia, left eye {eye_en_map.get(eye_left, '')}, "
+                    f"right eye {eye_en_map.get(eye_right, '')}")
+    else:
+        eye_desc = f"{eye_en_map.get(eye_color, '')} eyes"
+
     prompt = (
         f"anime vtuber character, {hair_en_map.get(hair_color, '')} hair, "
-        f"{eye_en_map.get(eye_color, '')} eyes, "
+        f"{eye_desc}, "
         f"{event_info['keywords']} themed costume, "
         f"{vibe_en_map.get(vibe, 'cute')} style, "
         f"full body standing pose, flat 2D cel shading anime illustration, "
