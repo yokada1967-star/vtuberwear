@@ -10,18 +10,18 @@ from pathlib import Path
 CONFIG_PATH = Path.home() / ".config/vtuber-wear/config.json"
 
 EVENTS = {
-    "🎍 お正月・新年":       {"month": 1,  "keywords": "振袖 晴れ着 門松 和風"},
-    "💝 バレンタイン":       {"month": 2,  "keywords": "ピンク ハート チョコ 天使"},
-    "🌸 卒業・ひな祭り":     {"month": 3,  "keywords": "袴 桜 春色"},
-    "🌼 入学・お花見":       {"month": 4,  "keywords": "制服 桜 春"},
-    "🎏 GW・こどもの日":     {"month": 5,  "keywords": "鯉のぼり 忍者 武将"},
-    "☔ 梅雨・花嫁":         {"month": 6,  "keywords": "レインコート 花嫁 白"},
-    "🌟 七夕・夏前":         {"month": 7,  "keywords": "浴衣 星 天の川"},
-    "🎆 夏祭り・花火":       {"month": 8,  "keywords": "浴衣 花火 かき氷"},
-    "🌕 お月見・秋":         {"month": 9,  "keywords": "和服 うさぎ 月 紅葉"},
-    "🎃 ハロウィン":         {"month": 10, "keywords": "魔女 吸血鬼 かぼちゃ 黒オレンジ"},
-    "🍂 七五三・文化祭":     {"month": 11, "keywords": "着物 制服 学園祭"},
-    "🎄 クリスマス":         {"month": 12, "keywords": "サンタ 赤白 雪 トナカイ"},
+    "🎍 お正月・新年":   {"month": 1,  "costume": "wearing a furisode kimono with obi sash, new year decorations, red and gold Japanese traditional dress"},
+    "💝 バレンタイン":   {"month": 2,  "costume": "wearing a pink frilly dress with heart accessories, angel wings, holding chocolates, Valentine's Day theme"},
+    "🌸 卒業・ひな祭り": {"month": 3,  "costume": "wearing a hakama over kimono, cherry blossom petals falling, graduation ceremony outfit"},
+    "🌼 入学・お花見":   {"month": 4,  "costume": "wearing a cute school uniform, cherry blossom viewing party, spring floral accessories"},
+    "🎏 GW・こどもの日": {"month": 5,  "costume": "wearing a kunoichi ninja outfit or samurai armor, Japanese warrior style"},
+    "☔ 梅雨・花嫁":     {"month": 6,  "costume": "wearing a white wedding dress with veil, holding flower bouquet, rainy season theme"},
+    "🌟 七夕・夏前":     {"month": 7,  "costume": "wearing a yukata with star pattern, Tanabata festival, Milky Way decorations, summer night"},
+    "🎆 夏祭り・花火":   {"month": 8,  "costume": "wearing a yukata with floral pattern and obi sash, summer festival, fireworks in background, holding a fan"},
+    "🌕 お月見・秋":     {"month": 9,  "costume": "wearing a traditional Japanese kimono, autumn leaves, full moon, rabbit motif accessories"},
+    "🎃 ハロウィン":     {"month": 10, "costume": "wearing a witch costume with pointy hat, black and orange dress with ruffles, holding a pumpkin, Halloween night"},
+    "🍂 七五三・文化祭": {"month": 11, "costume": "wearing a colorful kimono with elaborate accessories, autumn festival"},
+    "🎄 クリスマス":     {"month": 12, "costume": "wearing a Santa Claus outfit with fur trim, red and white, Christmas tree and snow in background"},
 }
 
 VIBES = ["かわいい 💕", "かっこいい ⚔️", "ふわふわ 🌸", "セクシー 🌙", "クール 🧊", "ポップ 🎨"]
@@ -161,7 +161,7 @@ if st.button("🎨  コンセプト画像を生成する", type="primary", use_c
     prompt = (
         f"anime vtuber character, {hair_en_map.get(hair_color, '')} hair, "
         f"{eye_desc}, "
-        f"{event_info['keywords']} themed costume, "
+        f"{event_info['costume']}, "
         f"{vibe_en_map.get(vibe, 'cute')} style, "
         f"full body standing pose, flat 2D cel shading anime illustration, "
         f"clean line art, white background, high quality"
